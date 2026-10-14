@@ -10,7 +10,7 @@
         body {
             font-family: 'Malgun Gothic', sans-serif;
         }
-        /* 스크롤바 커스텀 */
+        /* 스크롤바 디자인 */
         ::-webkit-scrollbar {
             width: 6px;
         }
@@ -23,8 +23,8 @@
 <body class="bg-gray-100 h-screen flex flex-col overflow-hidden">
 
     <!-- 상단 헤더 영역 -->
-    <header class="bg-amber-800 text-white px-6 py-4 shadow-md flex items-center justify-between shrink-0">
-        <h1 class="text-xl font-bold flex items-center gap-2">
+    <header class="bg-amber-800 text-white px-6 py-3 shadow-md flex items-center justify-between shrink-0">
+        <h1 class="text-lg font-bold flex items-center gap-2">
             🏛️ 유적지 탐방 & 로드뷰 서비스
         </h1>
         <span class="text-xs bg-amber-900 text-amber-100 px-3 py-1 rounded-full font-medium">
@@ -32,7 +32,7 @@
         </span>
     </header>
 
-    <!-- 메인 컨테이너: 좌우 2분할 레이아웃 -->
+    <!-- 메인 컨테이너: 좌우 2분할 레이아웃 (반응형) -->
     <main class="flex-1 flex flex-col md:flex-row overflow-hidden">
         
         <!-- 왼쪽 영역: 탭, 검색바, 장소 리스트 -->
@@ -62,7 +62,7 @@
                     <input 
                         type="text" 
                         id="search-input" 
-                        placeholder="지역명 입력 (예: 서울, 경주, 부여)" 
+                        placeholder="지역명 입력 (예: 경주, 서울, 부여)" 
                         class="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-800 text-sm"
                     >
                     <button 
@@ -77,7 +77,7 @@
             <!-- 장소 결과 리스트 영역 -->
             <div id="place-list-container" class="flex-1 overflow-y-auto divide-y divide-gray-100 p-3 space-y-2">
                 <div class="text-center text-gray-400 py-20 text-sm">
-                    위치를 허용하거나 탭을 선택하면 주변 유적지를 불러옵니다!
+                    위치를 허용하거나 검색어를 입력하면 유적지를 불러옵니다!
                 </div>
             </div>
         </section>
@@ -85,12 +85,12 @@
         <!-- 오른쪽 영역: 지도 및 로드뷰 화면 -->
         <section class="flex-1 relative bg-gray-200 flex flex-col">
             
-            <!-- 뷰 전환 토글 버튼 (지도 / 로드뷰) -->
-            <div class="absolute top-4 left-4 z-20 bg-white shadow-md rounded-xl p-1.5 flex gap-1 border border-gray-200">
+            <!-- 뷰 전환 토글 버튼 (지도 / 로드뷰) - 확실하게 보이도록 상단에 배치 -->
+            <div class="absolute top-4 left-4 z-20 bg-white shadow-lg rounded-xl p-1.5 flex gap-1 border border-gray-200">
                 <button 
                     id="btn-map" 
                     onclick="changeViewMode('map')" 
-                    class="px-4 py-2 rounded-lg text-xs font-bold bg-amber-800 text-white transition-colors cursor-pointer flex items-center gap-1.5"
+                    class="px-4 py-2 rounded-lg text-xs font-bold bg-amber-800 text-white transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm"
                 >
                     🗺️ 지도 보기
                 </button>
@@ -183,7 +183,7 @@
                         map.setCenter(currentPosition);
                         
                         displayCurrentLocationMarker(currentPosition);
-                        searchPlacesByTab(); // 현재 위치 기반 기본 검색 실행
+                        searchPlacesByTab(); // 초기 검색 실행
                     },
                     (error) => {
                         console.warn('위치 권한을 얻지 못했습니다. 기본 위치로 설정합니다.', error);
@@ -263,7 +263,7 @@
         }
 
         /**
-         * 5. 검색창 키워드 검색 처리 함수
+         * 5. 검색창 키워드 검색 처리 함수 (전국 검색 가능하도록 수정)
          */
         function searchByKeyword(event) {
             event.preventDefault();
@@ -287,17 +287,23 @@
 
             let searchQuery = '';
             if (currentKeyword) {
+                // 사용자가 키워드(예: 경주)를 입력하면 전국 어디든 검색되도록 조합
                 searchQuery = currentTab === 'museum' ? currentKeyword + ' 국립박물관' : currentKeyword + ' 유적건조물';
             } else {
+                // 키워드가 없으면 현재 지도 중심 주변 검색
                 searchQuery = currentTab === 'museum' ? '국립박물관' : '유적건조물';
             }
 
-            const searchOptions = {
-                location: map.getCenter(),
-                radius: 20000 // 반경 20km
-            };
-
-            ps.keywordSearch(searchQuery, placesSearchCB, searchOptions);
+            // 키워드가 입력된 경우 지역 제한 없이 검색하기 위해 searchOptions 생략 또는 전국 단위 검색 적용
+            if (currentKeyword) {
+                ps.keywordSearch(searchQuery, placesSearchCB);
+            } else {
+                const searchOptions = {
+                    location: map.getCenter(),
+                    radius: 20000
+                };
+                ps.keywordSearch(searchQuery, placesSearchCB, searchOptions);
+            }
         }
 
         /**
@@ -311,7 +317,7 @@
             } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
                 listContainer.innerHTML = `
                     <div class="text-center text-gray-400 py-20 text-sm">
-                        주변에 검색된 장소가 없습니다. 다른 지역을 검색해보세요!
+                        검색 결과가 없습니다. 다른 지역이나 검색어를 입력해보세요!
                     </div>
                 `;
             } else if (status === kakao.maps.services.Status.ERROR) {
@@ -332,7 +338,6 @@
                 const place = places[i];
                 const placePosition = new kakao.maps.LatLng(place.y, place.x);
 
-                // 마커 생성 (국립박물관: 🗞️, 문화유산: 🌟)
                 const marker = addCustomMarker(placePosition, currentTab);
                 bounds.extend(placePosition);
 
@@ -379,7 +384,7 @@
                 // 리스트 카드 클릭 시
                 itemEl.addEventListener('click', () => {
                     map.setCenter(placePosition);
-                    map.setLevel(3); // 상세 위치 확대
+                    map.setLevel(3);
                     selectedPosition = placePosition;
 
                     if (activeViewMode === 'roadview') {
@@ -459,16 +464,15 @@
             if (mode === 'map') {
                 mapDiv.style.display = 'block';
                 roadviewDiv.style.display = 'none';
-                btnMap.className = "px-4 py-2 rounded-lg text-xs font-bold bg-amber-800 text-white transition-colors cursor-pointer flex items-center gap-1.5";
+                btnMap.className = "px-4 py-2 rounded-lg text-xs font-bold bg-amber-800 text-white transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm";
                 btnRoadview.className = "px-4 py-2 rounded-lg text-xs font-bold text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer flex items-center gap-1.5";
-                map.relayout(); // 지도 크기 변경 재렌더링
+                map.relayout();
             } else {
                 mapDiv.style.display = 'none';
                 roadviewDiv.style.display = 'block';
-                btnRoadview.className = "px-4 py-2 rounded-lg text-xs font-bold bg-amber-800 text-white transition-colors cursor-pointer flex items-center gap-1.5";
+                btnRoadview.className = "px-4 py-2 rounded-lg text-xs font-bold bg-amber-800 text-white transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm";
                 btnMap.className = "px-4 py-2 rounded-lg text-xs font-bold text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer flex items-center gap-1.5";
                 
-                // 로드뷰 크기 재렌더링 및 선택 위치 갱신
                 roadview.relayout();
                 if (selectedPosition) {
                     updateRoadview(selectedPosition);
@@ -477,12 +481,12 @@
         }
 
         /**
-         * 12. 특정 좌표의 로드뷰 반영 함수 (RoadviewClient 연동)
+         * 12. 특정 좌표의 로드뷰 반영 함수
          */
         function updateRoadview(position) {
             roadviewClient.getNearestPanoId(position, 50, function(panoId) {
                 if (panoId) {
-                    roadview.setPanoId(panoId, position); // panoId와 중심좌표를 통해 로드뷰 실행
+                    roadview.setPanoId(panoId, position);
                 } else {
                     alert('이 주변에는 제공되는 로드뷰 사진이 없습니다.');
                 }
