@@ -1,4 +1,3 @@
-# birdd
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -11,32 +10,40 @@
         body {
             font-family: 'Malgun Gothic', sans-serif;
         }
+        /* 스크롤바 커스텀 */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 3px;
+        }
     </style>
 </head>
 <body class="bg-gray-100 h-screen flex flex-col overflow-hidden">
 
     <!-- 상단 헤더 영역 -->
-    <header class="bg-amber-700 text-white px-6 py-4 shadow-md flex items-center justify-between shrink-0">
+    <header class="bg-amber-800 text-white px-6 py-4 shadow-md flex items-center justify-between shrink-0">
         <h1 class="text-xl font-bold flex items-center gap-2">
-            🏛️ 유적지 탐방 카카오맵 & 로드뷰
+            🏛️ 유적지 탐방 & 로드뷰 서비스
         </h1>
-        <span class="text-xs bg-amber-800 text-amber-100 px-3 py-1 rounded-full font-medium">
-            국립박물관 & 문화유산 탐색
+        <span class="text-xs bg-amber-900 text-amber-100 px-3 py-1 rounded-full font-medium">
+            국립박물관 & 문화유산 내 손 안의 가이드
         </span>
     </header>
 
     <!-- 메인 컨테이너: 좌우 2분할 레이아웃 -->
     <main class="flex-1 flex flex-col md:flex-row overflow-hidden">
         
-        <!-- 왼쪽 영역: 탭 버튼 및 결과 리스트 -->
-        <section class="w-full md:w-[400px] lg:w-[450px] bg-white border-r border-gray-200 flex flex-col shrink-0 z-10 shadow-lg">
+        <!-- 왼쪽 영역: 탭, 검색바, 장소 리스트 -->
+        <section class="w-full md:w-[420px] lg:w-[460px] bg-white border-r border-gray-200 flex flex-col shrink-0 z-10 shadow-lg">
             
             <!-- 탭 버튼 영역 (국립박물관 / 문화유산) -->
             <div class="grid grid-cols-2 gap-2 p-4 bg-gray-50 border-b border-gray-200">
                 <button 
                     id="tab-museum" 
                     onclick="switchTab('museum')"
-                    class="py-3 px-4 rounded-xl font-bold text-sm transition-all shadow-sm flex items-center justify-center gap-2 bg-amber-700 text-white cursor-pointer"
+                    class="py-3 px-4 rounded-xl font-bold text-sm transition-all shadow-sm flex items-center justify-center gap-2 bg-amber-800 text-white cursor-pointer"
                 >
                     🗞️ 국립박물관
                 </button>
@@ -50,17 +57,17 @@
             </div>
 
             <!-- 키워드 직접 검색바 -->
-            <div class="p-4 border-b border-gray-100">
+            <div class="p-4 border-b border-gray-100 bg-white">
                 <form id="search-form" onsubmit="searchByKeyword(event)" class="flex gap-2">
                     <input 
                         type="text" 
                         id="search-input" 
-                        placeholder="지역명 또는 키워드 입력 (예: 경주, 서울)" 
-                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-700 text-sm"
+                        placeholder="지역명 입력 (예: 서울, 경주, 부여)" 
+                        class="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-800 text-sm"
                     >
                     <button 
                         type="submit" 
-                        class="bg-amber-700 hover:bg-amber-800 text-white font-semibold px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer"
+                        class="bg-amber-800 hover:bg-amber-900 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors cursor-pointer"
                     >
                         검색
                     </button>
@@ -68,43 +75,44 @@
             </div>
 
             <!-- 장소 결과 리스트 영역 -->
-            <div id="place-list-container" class="flex-1 overflow-y-auto divide-y divide-gray-100 p-2">
+            <div id="place-list-container" class="flex-1 overflow-y-auto divide-y divide-gray-100 p-3 space-y-2">
                 <div class="text-center text-gray-400 py-20 text-sm">
-                    상단 탭을 선택하거나 위치를 허용하면 주변 유적지를 불러옵니다!
+                    위치를 허용하거나 탭을 선택하면 주변 유적지를 불러옵니다!
                 </div>
             </div>
         </section>
 
-        <!-- 오른쪽 영역: 지도 및 로드뷰 표시 영역 -->
-        <section class="flex-1 relative bg-gray-200">
-            <!-- 카카오 지도가 그려질 DIV 요소 -->
-            <div id="map" class="w-full h-full"></div>
+        <!-- 오른쪽 영역: 지도 및 로드뷰 화면 -->
+        <section class="flex-1 relative bg-gray-200 flex flex-col">
             
-            <!-- 로드뷰가 그려질 DIV 요소 (기본 숨김 처리) -->
-            <div id="roadview" class="w-full h-full absolute inset-0 hidden z-0"></div>
-            
-            <!-- 지도/로드뷰 전환 토글 버튼 -->
-            <div class="absolute top-6 left-6 z-20 bg-white shadow-md rounded-lg p-1 flex gap-1 border border-gray-200">
+            <!-- 뷰 전환 토글 버튼 (지도 / 로드뷰) -->
+            <div class="absolute top-4 left-4 z-20 bg-white shadow-md rounded-xl p-1.5 flex gap-1 border border-gray-200">
                 <button 
                     id="btn-map" 
-                    onclick="toggleView('map')" 
-                    class="px-3 py-1.5 rounded-md text-xs font-bold bg-amber-700 text-white transition-colors cursor-pointer"
+                    onclick="changeViewMode('map')" 
+                    class="px-4 py-2 rounded-lg text-xs font-bold bg-amber-800 text-white transition-colors cursor-pointer flex items-center gap-1.5"
                 >
                     🗺️ 지도 보기
                 </button>
                 <button 
                     id="btn-roadview" 
-                    onclick="toggleView('roadview')" 
-                    class="px-3 py-1.5 rounded-md text-xs font-bold text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+                    onclick="changeViewMode('roadview')" 
+                    class="px-4 py-2 rounded-lg text-xs font-bold text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer flex items-center gap-1.5"
                 >
                     🚗 로드뷰 보기
                 </button>
             </div>
 
+            <!-- 카카오 지도 컨테이너 -->
+            <div id="map" class="w-full h-full"></div>
+
+            <!-- 카카오 로드뷰 컨테이너 (기본 숨김) -->
+            <div id="roadview" class="w-full h-full hidden"></div>
+            
             <!-- 현재 위치로 이동하는 버튼 -->
             <button 
                 onclick="moveToCurrentLocation()"
-                class="absolute bottom-6 right-6 bg-white hover:bg-gray-50 text-gray-700 font-bold px-4 py-3 rounded-full shadow-lg border border-gray-200 text-sm flex items-center gap-2 z-20 transition-transform active:scale-95 cursor-pointer"
+                class="absolute bottom-6 right-6 bg-white hover:bg-gray-50 text-gray-700 font-bold px-4.5 py-3 rounded-full shadow-xl border border-gray-200 text-sm flex items-center gap-2 z-20 transition-transform active:scale-95 cursor-pointer"
                 title="내 위치로 이동"
             >
                 🧭 내 위치
@@ -113,51 +121,57 @@
 
     </main>
 
-    <!-- 카카오 지도 JavaScript SDK 로드 (libraries=services 포함) -->
+    <!-- 카카오 지도 SDK (libraries=services 포함) -->
     <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=452ca8db7c18b33eb094278b28cc9239&libraries=services&autoload=false"></script>
     
     <script>
         // 전역 변수 선언
         let map = null;               // 지도 객체
-        let ps = null;                // 장소 검색 서비스 객체
-        let markers = [];             // 지도에 표시된 마커 배열
-        let currentPosition = null;   // 현재 위치 좌표
-        let currentTab = 'museum';    // 현재 활성화된 탭 ('museum' 또는 'heritage')
-        let currentInfowindow = null; // 현재 열려있는 팝업
-        let currentKeyword = '';      // 키워드 검색어
+        let ps = null;                // 장소 검색 객체
+        let markers = [];             // 마커 객체 배열
+        let currentPosition = null;   // 사용자 현재 위치 좌표
+        let currentTab = 'museum';    // 현재 탭 ('museum' 또는 'heritage')
+        let currentInfowindow = null; // 열려있는 인포윈도우 팝업
+        let currentKeyword = '';      // 검색어 키워드
 
-        // 로드뷰 관련 전역 객체
-        let roadviewContainer = null; 
+        // 로드뷰 관련 변수
         let roadview = null;          
         let roadviewClient = null;    
-        let activeViewMode = 'map';   // 현재 보고 있는 화면 모드 ('map' 또는 'roadview')
-        let selectedPlacePosition = null; // 사용자가 선택한 장소의 좌표
+        let activeViewMode = 'map';   // 현재 화면 모드 ('map' 또는 'roadview')
+        let selectedPosition = null;  // 현재 선택된 장소의 좌표
 
-        // 페이지 로드 완료 시 SDK 초기화 실행
+        // 페이지 로드 시 SDK 초기화
         window.addEventListener('DOMContentLoaded', () => {
             kakao.maps.load(() => {
-                initMap();
-                initRoadview();
+                initMapAndRoadview();
             });
         });
 
         /**
-         * 1. 지도 초기화 및 위치 권한 요청 함수
+         * 1. 지도 및 로드뷰 초기화 함수
          */
-        function initMap() {
+        function initMapAndRoadview() {
             const mapContainer = document.getElementById('map');
             
+            // 기본 중심 좌표 (서울 시청)
             let defaultLat = 37.566826;
             let defaultLng = 126.978656;
 
             const mapOption = {
                 center: new kakao.maps.LatLng(defaultLat, defaultLng),
-                level: 5 // 지도 확대 레벨 5
+                level: 5 // 요구 조건: 지도 확대 레벨 5
             };
 
+            // 지도 생성
             map = new kakao.maps.Map(mapContainer, mapOption);
             ps = new kakao.maps.services.Places();
 
+            // 로드뷰 객체 생성
+            const roadviewContainer = document.getElementById('roadview');
+            roadview = new kakao.maps.Roadview(roadviewContainer);
+            roadviewClient = new kakao.maps.RoadviewClient();
+
+            // 위치 권한 요청 (Geolocation)
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
@@ -165,16 +179,16 @@
                         const lng = position.coords.longitude;
                         
                         currentPosition = new kakao.maps.LatLng(lat, lng);
-                        selectedPlacePosition = currentPosition; // 초기 선택 좌표는 내 위치
+                        selectedPosition = currentPosition;
                         map.setCenter(currentPosition);
                         
                         displayCurrentLocationMarker(currentPosition);
-                        searchPlacesByTab();
+                        searchPlacesByTab(); // 현재 위치 기반 기본 검색 실행
                     },
                     (error) => {
                         console.warn('위치 권한을 얻지 못했습니다. 기본 위치로 설정합니다.', error);
                         currentPosition = new kakao.maps.LatLng(defaultLat, defaultLng);
-                        selectedPlacePosition = currentPosition;
+                        selectedPosition = currentPosition;
                         displayCurrentLocationMarker(currentPosition);
                         searchPlacesByTab();
                     },
@@ -182,75 +196,24 @@
                 );
             } else {
                 currentPosition = new kakao.maps.LatLng(defaultLat, defaultLng);
-                selectedPlacePosition = currentPosition;
+                selectedPosition = currentPosition;
                 displayCurrentLocationMarker(currentPosition);
                 searchPlacesByTab();
             }
         }
 
         /**
-         * 2. 로드뷰 객체 초기화 함수
-         */
-        function initRoadview() {
-            roadviewContainer = document.getElementById('roadview'); // 로드뷰를 표시할 div
-            roadview = new kakao.maps.Roadview(roadviewContainer);   // 로드뷰 객체
-            roadviewClient = new kakao.maps.RoadviewClient();        // 좌표로부터 로드뷰 파노ID를 가져올 helper 객체
-        }
-
-        /**
-         * 3. 특정 좌표의 로드뷰 실행 함수
-         */
-        function updateRoadview(position) {
-            // 특정 위치의 좌표와 가까운 로드뷰의 panoId를 추출하여 로드뷰를 띄운다
-            roadviewClient.getNearestPanoId(position, 50, function(panoId) {
-                if (panoId) {
-                    roadview.setPanoId(panoId, position); // panoId와 중심좌표를 통해 로드뷰 실행
-                } else {
-                    console.warn('이 위치 주변에는 제공되는 로드뷰가 없습니다.');
-                }
-            });
-        }
-
-        /**
-         * 4. 지도 보기와 로드뷰 보기 화면 전환 함수
-         */
-        function toggleView(mode) {
-            activeViewMode = mode;
-            const mapDiv = document.getElementById('map');
-            const rvDiv = document.getElementById('roadview');
-            const btnMap = document.getElementById('btn-map');
-            const btnRv = document.getElementById('btn-roadview');
-
-            if (mode === 'map') {
-                mapDiv.style.display = 'block';
-                rvDiv.classList.add('hidden');
-                btnMap.className = "px-3 py-1.5 rounded-md text-xs font-bold bg-amber-700 text-white transition-colors cursor-pointer";
-                btnRv.className = "px-3 py-1.5 rounded-md text-xs font-bold text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer";
-            } else {
-                mapDiv.style.display = 'none';
-                rvDiv.classList.remove('hidden');
-                btnRv.className = "px-3 py-1.5 rounded-md text-xs font-bold bg-amber-700 text-white transition-colors cursor-pointer";
-                btnMap.className = "px-3 py-1.5 rounded-md text-xs font-bold text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer";
-                
-                // 로드뷰 화면으로 전환될 때 선택된 장소 좌표로 로드뷰 갱신
-                if (selectedPlacePosition) {
-                    updateRoadview(selectedPlacePosition);
-                }
-            }
-        }
-
-        /**
-         * 5. 현재 위치 파란 점 표시 함수
+         * 2. 현재 위치 파란 점 표시 함수
          */
         function displayCurrentLocationMarker(locPosition) {
             const content = document.createElement('div');
             content.style.cssText = `
-                width: 20px;
-                height: 20px;
-                background-color: #3b82f6;
+                width: 22px;
+                height: 22px;
+                background-color: #2563eb;
                 border: 3px solid #ffffff;
                 border-radius: 50%;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
             `;
 
             new kakao.maps.CustomOverlay({
@@ -262,13 +225,13 @@
         }
 
         /**
-         * 6. '내 위치' 버튼 클릭 시 지도 이동 함수
+         * 3. '내 위치' 버튼 클릭 시 이동
          */
         function moveToCurrentLocation() {
             if (currentPosition) {
                 map.setCenter(currentPosition);
                 map.setLevel(5);
-                selectedPlacePosition = currentPosition;
+                selectedPosition = currentPosition;
                 if (activeViewMode === 'roadview') {
                     updateRoadview(currentPosition);
                 }
@@ -278,7 +241,7 @@
         }
 
         /**
-         * 7. 탭 전환 처리 함수
+         * 4. 탭 전환 처리 함수
          */
         function switchTab(tabName) {
             currentTab = tabName;
@@ -289,10 +252,10 @@
             const btnHeritage = document.getElementById('tab-heritage');
 
             if (tabName === 'museum') {
-                btnMuseum.className = "py-3 px-4 rounded-xl font-bold text-sm transition-all shadow-sm flex items-center justify-center gap-2 bg-amber-700 text-white cursor-pointer";
+                btnMuseum.className = "py-3 px-4 rounded-xl font-bold text-sm transition-all shadow-sm flex items-center justify-center gap-2 bg-amber-800 text-white cursor-pointer";
                 btnHeritage.className = "py-3 px-4 rounded-xl font-bold text-sm transition-all shadow-sm flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 cursor-pointer";
             } else {
-                btnHeritage.className = "py-3 px-4 rounded-xl font-bold text-sm transition-all shadow-sm flex items-center justify-center gap-2 bg-amber-700 text-white cursor-pointer";
+                btnHeritage.className = "py-3 px-4 rounded-xl font-bold text-sm transition-all shadow-sm flex items-center justify-center gap-2 bg-amber-800 text-white cursor-pointer";
                 btnMuseum.className = "py-3 px-4 rounded-xl font-bold text-sm transition-all shadow-sm flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 cursor-pointer";
             }
 
@@ -300,7 +263,7 @@
         }
 
         /**
-         * 8. 상단 입력창 키워드 검색 처리 함수
+         * 5. 검색창 키워드 검색 처리 함수
          */
         function searchByKeyword(event) {
             event.preventDefault();
@@ -314,13 +277,12 @@
         }
 
         /**
-         * 9. 현재 선택된 탭과 조건에 맞춰 장소 검색 요청 수행
+         * 6. 탭 및 검색어 조건에 따른 장소 검색 요청
          */
         function searchPlacesByTab() {
             if (currentInfowindow) {
                 currentInfowindow.close();
             }
-
             removeMarkers();
 
             let searchQuery = '';
@@ -332,14 +294,14 @@
 
             const searchOptions = {
                 location: map.getCenter(),
-                radius: 20000
+                radius: 20000 // 반경 20km
             };
 
             ps.keywordSearch(searchQuery, placesSearchCB, searchOptions);
         }
 
         /**
-         * 10. 장소 검색 결과 콜백 함수
+         * 7. 검색 결과 콜백 함수
          */
         function placesSearchCB(data, status, pagination) {
             const listContainer = document.getElementById('place-list-container');
@@ -358,7 +320,7 @@
         }
 
         /**
-         * 11. 검색 결과 리스트 및 마커 화면 출력 함수
+         * 8. 검색 결과 리스트 및 마커 출력
          */
         function displayPlaces(places) {
             const listContainer = document.getElementById('place-list-container');
@@ -370,13 +332,15 @@
                 const place = places[i];
                 const placePosition = new kakao.maps.LatLng(place.y, place.x);
 
+                // 마커 생성 (국립박물관: 🗞️, 문화유산: 🌟)
                 const marker = addCustomMarker(placePosition, currentTab);
                 bounds.extend(placePosition);
 
                 const infowindowContent = `
-                    <div style="padding:10px; font-size:12px; width:200px; line-height:1.4;">
-                        <strong style="font-size:13px; color:#b45309;">${place.place_name}</strong><br>
-                        <span style="color:#666;">${place.road_address_name || place.address_name}</span>
+                    <div style="padding:12px; font-size:12px; width:220px; line-height:1.5;">
+                        <strong style="font-size:14px; color:#92400e;">${place.place_name}</strong><br>
+                        <span style="color:#555;">${place.road_address_name || place.address_name}</span><br>
+                        <span style="color:#2563eb; font-weight:600;">${place.phone || '번호 없음'}</span>
                     </div>
                 `;
                 const infowindow = new kakao.maps.InfoWindow({
@@ -384,7 +348,7 @@
                     removable: true
                 });
 
-                // 마커 클릭 시: 지도 이동 및 로드뷰 좌표 갱신
+                // 마커 클릭 시 이벤트
                 kakao.maps.event.addListener(marker, 'click', () => {
                     if (currentInfowindow) {
                         currentInfowindow.close();
@@ -392,29 +356,31 @@
                     infowindow.open(map, marker);
                     currentInfowindow = infowindow;
 
-                    selectedPlacePosition = placePosition;
+                    selectedPosition = placePosition;
                     if (activeViewMode === 'roadview') {
                         updateRoadview(placePosition);
                     }
                 });
 
-                // 왼쪽 리스트 아이템 생성
+                // 왼쪽 카드 리스트 아이템 생성
                 const itemEl = document.createElement('div');
-                itemEl.className = 'p-4 hover:bg-amber-50 cursor-pointer transition-colors border-b border-gray-100';
+                itemEl.className = 'bg-white p-4 rounded-xl border border-gray-200 hover:border-amber-600 hover:shadow-md cursor-pointer transition-all';
                 itemEl.innerHTML = `
-                    <h3 class="font-bold text-gray-800 text-sm mb-1 flex items-center gap-1.5">
-                        <span>${currentTab === 'museum' ? '🗞️' : '🌟'}</span>
-                        <span>${i + 1}. ${place.place_name}</span>
-                    </h3>
-                    <p class="text-xs text-gray-600 mb-1">${place.road_address_name || place.address_name}</p>
-                    <p class="text-xs text-amber-700 font-medium">${place.phone || '전화번호 없음'}</p>
+                    <div class="flex items-start justify-between mb-1">
+                        <h3 class="font-bold text-gray-900 text-sm flex items-center gap-1.5">
+                            <span class="text-base">${currentTab === 'museum' ? '🗞️' : '🌟'}</span>
+                            <span>${i + 1}. ${place.place_name}</span>
+                        </h3>
+                    </div>
+                    <p class="text-xs text-gray-600 mb-1.5 pl-6">${place.road_address_name || place.address_name}</p>
+                    <p class="text-xs text-amber-800 font-medium pl-6">${place.phone || '전화번호 정보 없음'}</p>
                 `;
 
-                // 리스트 클릭 시: 지도 중심 이동, 로드뷰 좌표 갱신, 팝업 열기
+                // 리스트 카드 클릭 시
                 itemEl.addEventListener('click', () => {
                     map.setCenter(placePosition);
-                    map.setLevel(3);
-                    selectedPlacePosition = placePosition;
+                    map.setLevel(3); // 상세 위치 확대
+                    selectedPosition = placePosition;
 
                     if (activeViewMode === 'roadview') {
                         updateRoadview(placePosition);
@@ -434,20 +400,19 @@
         }
 
         /**
-         * 12. 탭별 커스텀 마커 생성 함수
+         * 9. 탭별 커스텀 마커 생성
          */
         function addCustomMarker(position, tabType) {
             const emoji = tabType === 'museum' ? '🗞️' : '🌟';
-            const bgColor = tabType === 'museum' ? '#b45309' : '#d97706';
+            const borderColor = tabType === 'museum' ? '#92400e' : '#d97706';
 
             const content = document.createElement('div');
-            content.className = 'flex items-center justify-center shadow-md rounded-full text-xs font-bold transition-transform hover:scale-110';
+            content.className = 'flex items-center justify-center shadow-lg rounded-full text-xs font-bold transition-transform hover:scale-125';
             content.style.cssText = `
-                width: 32px;
-                height: 32px;
+                width: 36px;
+                height: 36px;
                 background-color: white;
-                border: 2px solid ${bgColor};
-                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                border: 3px solid ${borderColor};
                 cursor: pointer;
             `;
             content.innerHTML = emoji;
@@ -472,13 +437,56 @@
         }
 
         /**
-         * 13. 마커 전체 삭제 함수
+         * 10. 기존 마커 전체 삭제
          */
         function removeMarkers() {
             for (let i = 0; i < markers.length; i++) {
                 markers[i].setMap(null);
             }
             markers = [];
+        }
+
+        /**
+         * 11. 지도 보기 / 로드뷰 보기 모드 전환 함수
+         */
+        function changeViewMode(mode) {
+            activeViewMode = mode;
+            const mapDiv = document.getElementById('map');
+            const roadviewDiv = document.getElementById('roadview');
+            const btnMap = document.getElementById('btn-map');
+            const btnRoadview = document.getElementById('btn-roadview');
+
+            if (mode === 'map') {
+                mapDiv.style.display = 'block';
+                roadviewDiv.style.display = 'none';
+                btnMap.className = "px-4 py-2 rounded-lg text-xs font-bold bg-amber-800 text-white transition-colors cursor-pointer flex items-center gap-1.5";
+                btnRoadview.className = "px-4 py-2 rounded-lg text-xs font-bold text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer flex items-center gap-1.5";
+                map.relayout(); // 지도 크기 변경 재렌더링
+            } else {
+                mapDiv.style.display = 'none';
+                roadviewDiv.style.display = 'block';
+                btnRoadview.className = "px-4 py-2 rounded-lg text-xs font-bold bg-amber-800 text-white transition-colors cursor-pointer flex items-center gap-1.5";
+                btnMap.className = "px-4 py-2 rounded-lg text-xs font-bold text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer flex items-center gap-1.5";
+                
+                // 로드뷰 크기 재렌더링 및 선택 위치 갱신
+                roadview.relayout();
+                if (selectedPosition) {
+                    updateRoadview(selectedPosition);
+                }
+            }
+        }
+
+        /**
+         * 12. 특정 좌표의 로드뷰 반영 함수 (RoadviewClient 연동)
+         */
+        function updateRoadview(position) {
+            roadviewClient.getNearestPanoId(position, 50, function(panoId) {
+                if (panoId) {
+                    roadview.setPanoId(panoId, position); // panoId와 중심좌표를 통해 로드뷰 실행
+                } else {
+                    alert('이 주변에는 제공되는 로드뷰 사진이 없습니다.');
+                }
+            });
         }
     </script>
 </body>
